@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Álgebra, Probabilidades y Estadística · 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0e0c09;
+  --bg2:       #14110d;
+  --bg3:       #1c1812;
+  --parchment: #c9b99a;
+  --sepia:     #8b7355;
+  --sepia2:    #5c4a32;
+  --sepia3:    #3a2e1e;
+  --gold:      #c9a84c;
+  --gold2:     #a07830;
+  --gold-dim:  rgba(201,168,76,0.12);
+  --gold-glow: rgba(201,168,76,0.22);
+  --ink:       #e8dcc8;
+  --ink2:      #a89878;
+  --ink3:      #6b5c42;
+  --danger:    #c0725a;
+  --success:   #7a9e72;
+  --serif:     'Crimson Text', serif;
+  --display:   'Cinzel', serif;
+  --typewriter:'Special Elite', cursive;
+  --fell:      'IM Fell English', serif;
+  --border:    rgba(201,168,76,0.1);
+  --border-h:  rgba(201,168,76,0.25);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+#particles-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(139,115,85,0.06) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 48px 28px 80px;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+  position: relative;
+}
+
+.ornament {
+  font-family: var(--fell);
+  font-size: 13px;
+  color: var(--gold2);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  opacity: 0.8;
+  animation: fadeDown 1s ease both;
+}
+
+.materia-nombre {
+  font-family: var(--display);
+  font-size: clamp(22px, 4.5vw, 38px);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  animation: fadeDown 1s ease 0.15s both;
+}
+
+.materia-sub {
+  font-family: var(--fell);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink3);
+  margin-top: 10px;
+  animation: fadeDown 1s ease 0.3s both;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 22px 0 0;
+  animation: fadeDown 1s ease 0.45s both;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold2), transparent);
+  opacity: 0.4;
+}
+
+.divider-glyph {
+  font-family: var(--fell);
+  font-size: 18px;
+  color: var(--gold);
+  opacity: 0.6;
+}
+
+/* ── UPLOAD ZONE ── */
+.upload-section {
+  margin-bottom: 36px;
+  animation: fadeUp 0.8s ease 0.5s both;
+}
+
+/* FIX CRÍTICO: La zona de upload usa position relative + z-index
+   para que el input quede SIEMPRE por encima de los pseudo-elementos */
+.upload-zone {
+  border: 1px solid var(--border-h);
+  border-radius: 4px;
+  padding: 44px 24px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.4s ease;
+  background: var(--bg2);
+  overflow: hidden;
+  /* Sin overflow:hidden en el input — los esquinas van en un wrapper aparte */
+}
+
+.upload-zone-corners::before,
+.upload-zone-corners::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--gold2);
+  border-style: solid;
+  opacity: 0.5;
+  transition: all 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.upload-zone-corners::before { top: 8px; left: 8px; border-width: 1px 0 0 1px; }
+.upload-zone-corners::after  { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+
+.upload-zone:hover .upload-zone-corners::before,
+.upload-zone:hover .upload-zone-corners::after { width: 28px; height: 28px; opacity: 1; }
+
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.05);
+  box-shadow: inset 0 0 40px rgba(201,168,76,0.04), 0 0 30px rgba(201,168,76,0.1);
+}
+
+/* FIX CRÍTICO: El input cubre toda la zona y tiene z-index alto
+   para que el click funcione siempre, incluso en móvil */
+.upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  z-index: 10; /* encima de todo */
+  font-size: 16px; /* evita zoom automático en iOS */
+}
+
+.upload-inner {
+  position: relative;
+  z-index: 1;
+  pointer-events: none; /* el contenido visual no intercepta clicks */
+}
+
+.upload-icon-wrap {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 18px;
+  border: 1px solid var(--border-h);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg3);
+  transition: all 0.4s ease;
+}
+
+.upload-zone:hover .upload-icon-wrap {
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(201,168,76,0.2);
+  transform: scale(1.08);
+}
+
+.upload-icon-wrap svg {
+  width: 22px; height: 22px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 1.3;
+  transition: transform 0.3s ease;
+}
+
+.upload-zone:hover .upload-icon-wrap svg { transform: translateY(-2px); }
+
+.upload-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--ink2);
+  margin-bottom: 8px;
+}
+
+.upload-sub {
+  font-family: var(--typewriter);
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+}
+
+/* ── FORM META ── */
+.file-meta-form {
+  display: none;
+  margin-top: 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.file-meta-form.active {
+  display: flex;
+  animation: unfold 0.35s ease;
+}
+
+@keyframes unfold {
+  from { opacity: 0; transform: translateY(-10px) scaleY(0.95); }
+  to   { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+.selected-file-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--bg3);
+  border-radius: 3px;
+  border-left: 2px solid var(--gold2);
+}
+
+.file-type-badge {
+  font-family: var(--typewriter);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.badge-pdf   { background: rgba(192,114,90,0.15); color: #c0725a; border: 1px solid rgba(192,114,90,0.3); }
+.badge-ppt   { background: rgba(180,130,70,0.15); color: #b48246; border: 1px solid rgba(180,130,70,0.3); }
+.badge-img   { background: rgba(100,170,140,0.15); color: #5aab8a; border: 1px solid rgba(100,170,140,0.3); }
+.badge-vid   { background: rgba(120,100,180,0.15); color: #9080c8; border: 1px solid rgba(120,100,180,0.3); }
+.badge-doc   { background: rgba(100,140,180,0.12); color: #7aa0c0; border: 1px solid rgba(100,140,180,0.25); }
+.badge-html  { background: rgba(122,158,114,0.15); color: #7a9e72; border: 1px solid rgba(122,158,114,0.3); }
+.badge-txt   { background: rgba(107,92,66,0.2); color: var(--ink2); border: 1px solid rgba(107,92,66,0.3); }
+.badge-default { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--border-h); }
+
+.selected-file-name {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selected-file-size {
+  font-family: var(--typewriter);
+  font-size: 10px;
+  color: var(--ink3);
+  margin-top: 3px;
+}
+
+.form-row { display: flex; flex-direction: column; gap: 7px; }
+
+.form-label {
+  font-family: var(--display);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+
+.form-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-h);
+  border-radius: 0;
+  padding: 10px 14px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 15px;
+  width: 100%;
+  transition: border-color 0.25s;
+  outline: none;
+}
+
+.form-input:focus { border-color: var(--gold2); background: rgba(201,168,76,0.03); }
+.form-input::placeholder { color: var(--ink3); font-style: italic; }
+
+.form-actions { display: flex; gap: 12px; margin-top: 4px; }
+
+.btn {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  padding: 11px 24px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  background: transparent;
+  border-color: var(--gold2);
+  color: var(--gold);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold-dim);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.btn-primary:hover::before { transform: scaleX(1); }
+.btn-primary:hover { box-shadow: 0 0 20px rgba(201,168,76,0.2); }
+.btn-primary span { position: relative; z-index: 1; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--ink3);
+}
+.btn-ghost:hover { border-color: var(--border-h); color: var(--ink2); }
+
+/* ── PROGRESS ── */
+.upload-progress { display: none; margin-top: 14px; }
+.upload-progress.active { display: block; animation: fadeUp 0.3s ease; }
+
+.progress-label {
+  font-family: var(--typewriter);
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-bar {
+  height: 1px;
+  background: var(--bg3);
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold2), var(--gold));
+  transition: width 0.3s ease;
+  width: 0%;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+/* ── SYNC STATUS ── */
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--typewriter);
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+.sync-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink3);
+  flex-shrink: 0;
+}
+
+.sync-dot.loading { background: var(--gold2); animation: pulse 1s infinite; }
+.sync-dot.ok { background: var(--success); }
+.sync-dot.error { background: var(--danger); }
+
+/* ── FILES LIST ── */
+.files-section { animation: fadeUp 0.8s ease 0.7s both; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--ink3);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-title::before {
+  content: '❧';
+  font-family: var(--fell);
+  font-size: 16px;
+  color: var(--gold2);
+  opacity: 0.6;
+}
+
+.section-actions { display: flex; align-items: center; gap: 10px; }
+
+.file-count {
+  font-family: var(--typewriter);
+  font-size: 11px;
+  color: var(--ink3);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 3px 12px;
+  letter-spacing: 0.08em;
+}
+
+.btn-refresh {
+  width: 28px; height: 28px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  color: var(--ink3);
+}
+.btn-refresh:hover { border-color: var(--gold2); color: var(--gold); }
+.btn-refresh svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.btn-refresh.spinning svg { animation: spin 0.7s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.files-list { display: flex; flex-direction: column; gap: 12px; }
+
+.file-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 18px 18px 18px 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.file-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold2);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+  transform-origin: bottom;
+}
+
+.file-card:hover { border-color: var(--border-h); background: rgba(201,168,76,0.03); }
+.file-card:hover::before { transform: scaleY(1); }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.file-card { animation: cardIn 0.4s ease both; }
+.file-card:nth-child(1) { animation-delay: 0.05s; }
+.file-card:nth-child(2) { animation-delay: 0.10s; }
+.file-card:nth-child(3) { animation-delay: 0.15s; }
+.file-card:nth-child(4) { animation-delay: 0.20s; }
+.file-card:nth-child(5) { animation-delay: 0.25s; }
+
+.file-card-meta { min-width: 0; }
+
+.file-card-name {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+
+.file-card-desc {
+  font-family: var(--fell);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink2);
+  margin-bottom: 8px;
+  line-height: 1.45;
+}
+
+.file-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.file-card-date {
+  font-family: var(--typewriter);
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+}
+
+.file-card-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.btn-icon {
+  width: 34px; height: 34px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+  color: var(--ink3);
+  text-decoration: none;
+}
+
+.btn-icon:hover { border-color: var(--gold2); color: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.15); }
+.btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); box-shadow: 0 0 12px rgba(192,114,90,0.2); }
+.btn-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.4; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  background: var(--bg2);
+}
+
+.empty-glyph {
+  font-family: var(--fell);
+  font-size: 36px;
+  color: var(--ink3);
+  margin-bottom: 16px;
+  opacity: 0.25;
+  display: block;
+}
+
+.empty-text {
+  font-family: var(--fell);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--ink3);
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--bg2);
+  border: 1px solid var(--border-h);
+  border-left: 3px solid var(--gold2);
+  border-radius: 2px;
+  padding: 14px 20px;
+  font-family: var(--typewriter);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  z-index: 1000;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--danger); }
+
+/* ── ANIMACIONES ── */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.loading-pulse { animation: pulse 1.2s ease-in-out infinite; }
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .container { padding: 32px 16px 60px; }
+  .file-card { padding: 14px; gap: 10px; }
+  .file-card-name { font-size: 14px; }
+  .toast { right: 16px; left: 16px; max-width: none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<div class="container">
+
+  <header class="header">
+    <div class="ornament">Informática Aplicada · 1.601 · 2026</div>
+    <h1 class="materia-nombre" id="materia-nombre">Álgebra, Probabilidades y Estadística</h1>
+    <p class="materia-sub" id="materia-sub">Números, azar y certeza</p>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-glyph" id="divider-glyph">✦</span>
+      <div class="divider-line"></div>
+    </div>
+  </header>
+
+  <div class="upload-section">
+    <!-- FIX: input fuera del overflow:hidden, con z-index alto y pointer-events correctos -->
+    <div class="upload-zone" id="upload-zone">
+      <div class="upload-zone-corners"></div>
+      <input type="file" id="file-input" accept="*/*" />
+      <div class="upload-inner">
+        <div class="upload-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <p class="upload-title">Arrastrá o hacé click para subir</p>
+        <p class="upload-sub">PDF · PPT · PPTX · DOC · imágenes · videos · cualquier formato</p>
+      </div>
+    </div>
+
+    <div class="file-meta-form" id="file-meta-form">
+      <div class="selected-file-info" id="selected-file-info">
+        <span class="file-type-badge badge-default" id="badge-ext">???</span>
+        <div style="min-width:0;flex:1">
+          <div class="selected-file-name" id="selected-file-name">archivo.pdf</div>
+          <div class="selected-file-size" id="selected-file-size">0 KB</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Descripción</label>
+        <input type="text" class="form-input" id="file-desc" placeholder="Cronograma, TP N°3, apuntes del martes…" />
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" id="btn-upload" onclick="uploadFile()">
+          <span>Subir archivo</span>
+        </button>
+        <button class="btn btn-ghost" onclick="cancelUpload()">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="upload-progress" id="upload-progress">
+      <div class="progress-label">
+        <span class="loading-pulse" id="progress-text">Subiendo al archivo…</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="files-section">
+    <div class="section-header">
+      <span class="section-title">Archivos</span>
+      <div class="section-actions">
+        <span class="file-count" id="file-count">0 archivos</span>
+        <button class="btn-refresh" id="btn-refresh" onclick="syncFromCloudinary()" title="Sincronizar">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="sync-status" id="sync-status">
+      <div class="sync-dot loading" id="sync-dot"></div>
+      <span id="sync-text">Conectando con el archivo…</span>
+    </div>
+
+    <div class="files-list" id="files-list">
+      <div class="empty-state" id="empty-state">
+        <span class="empty-glyph">❧</span>
+        <p class="empty-text">El archivo aguarda sus primeros folios</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CLOUDINARY CONFIG
+// ══════════════════════════════════════════
+const CLOUDINARY_CLOUD_NAME    = 'dkwkaehxy';
+const CLOUDINARY_UPLOAD_PRESET = 'materiasPreset';
+const MATERIA_FOLDER           = 'algebra_prob_est';   // carpeta en Cloudinary
+// ══════════════════════════════════════════
+
+// ── PARTÍCULAS ──
+(function() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx    = canvas.getContext('2d');
+  let   W, H, particles;
+
+  const COLORS = [
+    'rgba(201,168,76,',
+    'rgba(201,180,140,',
+    'rgba(139,115,85,',
+    'rgba(232,220,200,',
+  ];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function makeParticle() {
+    return {
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.2 + 0.3,
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: -(Math.random() * 0.25 + 0.05),
+      a: Math.random(),
+      da: (Math.random() * 0.003 + 0.001) * (Math.random() < 0.5 ? 1 : -1),
+      col: COLORS[Math.floor(Math.random() * COLORS.length)],
+      life: 0, maxLife: Math.random() * 400 + 200,
+      type: Math.random() < 0.15 ? 'cross' : 'dot',
+    };
+  }
+
+  function initParticles() {
+    particles = Array.from({ length: 55 }, makeParticle);
+    particles.forEach(p => { p.life = Math.random() * p.maxLife; });
+  }
+
+  function drawCross(x, y, size, alpha, col) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4);
+    ctx.strokeStyle = col + alpha + ')'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(-size, 0); ctx.lineTo(size, 0);
+    ctx.moveTo(0, -size); ctx.lineTo(0, size); ctx.stroke(); ctx.restore();
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach((p, i) => {
+      p.life++;
+      if (p.life > p.maxLife) { particles[i] = makeParticle(); return; }
+      const progress = p.life / p.maxLife;
+      const alpha = progress < 0.15 ? progress / 0.15 : progress > 0.75 ? (1 - progress) / 0.25 : 1;
+      const a = alpha * p.a * 0.55;
+      p.x += p.vx; p.y += p.vy; p.a += p.da;
+      if (p.a > 1) p.da = -Math.abs(p.da);
+      if (p.a < 0) p.da =  Math.abs(p.da);
+      if (p.type === 'cross') drawCross(p.x, p.y, p.r * 2.5, a.toFixed(3), p.col);
+      else {
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.col + a.toFixed(3) + ')'; ctx.fill();
+      }
+    });
+    requestAnimationFrame(tick);
+  }
+
+  resize(); initParticles(); tick();
+  window.addEventListener('resize', resize);
+})();
+
+// ── UTILS ──
+let selectedFile = null;
+
+function getExt(filename) { return (filename.split('.').pop() || 'bin').toLowerCase(); }
+
+// FIX: clasificación expandida para imágenes y videos
+function getBadgeClass(ext) {
+  const map = {
+    pdf: 'badge-pdf',
+    ppt: 'badge-ppt', pptx: 'badge-ppt',
+    doc: 'badge-doc', docx: 'badge-doc',
+    html: 'badge-html', htm: 'badge-html',
+    txt: 'badge-txt', md: 'badge-txt',
+    jpg: 'badge-img', jpeg: 'badge-img', png: 'badge-img',
+    gif: 'badge-img', webp: 'badge-img', svg: 'badge-img',
+    mp4: 'badge-vid', mov: 'badge-vid', avi: 'badge-vid',
+    mkv: 'badge-vid', webm: 'badge-vid',
+  };
+  return map[ext] || 'badge-default';
+}
+
+// FIX: detección de resource_type para Cloudinary
+function getResourceType(ext) {
+  const images = ['jpg','jpeg','png','gif','webp','bmp','tiff','svg','ico','avif'];
+  const videos = ['mp4','mov','avi','mkv','webm','flv','wmv','m4v','3gp'];
+  if (images.includes(ext)) return 'image';
+  if (videos.includes(ext)) return 'video';
+  return 'raw'; // PDF, PPT, DOC, etc. → raw
+}
+
+function formatSize(b) {
+  if (b < 1024)    return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(2) + ' MB';
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('es-AR',
+    { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+}
+
+// ── DRAG & DROP ──
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFileSelected(f);
+});
+
+// FIX: listener directo sobre el input (no el zone), evita conflictos
+document.getElementById('file-input').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) handleFileSelected(f);
+});
+
+function handleFileSelected(file) {
+  selectedFile = file;
+  const ext = getExt(file.name);
+  document.getElementById('badge-ext').textContent = ext.toUpperCase();
+  document.getElementById('badge-ext').className   = 'file-type-badge ' + getBadgeClass(ext);
+  document.getElementById('selected-file-name').textContent = file.name;
+  document.getElementById('selected-file-size').textContent = formatSize(file.size);
+  document.getElementById('file-meta-form').classList.add('active');
+  document.getElementById('file-desc').focus();
+}
+
+function cancelUpload() {
+  selectedFile = null;
+  document.getElementById('file-meta-form').classList.remove('active');
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-desc').value  = '';
+  document.getElementById('upload-progress').classList.remove('active');
+}
+
+// ── UPLOAD ──
+// FIX PRINCIPAL: endpoint dinámico según tipo de archivo
+// + etiqueta de descripción en context para recuperarla luego
+async function uploadFile() {
+  if (!selectedFile) return;
+
+  const desc       = document.getElementById('file-desc').value.trim();
+  const btn        = document.getElementById('btn-upload');
+  const ext        = getExt(selectedFile.name);
+  const resType    = getResourceType(ext);
+
+  btn.disabled = true;
+  btn.querySelector('span').textContent = 'Subiendo…';
+  document.getElementById('file-meta-form').classList.remove('active');
+  document.getElementById('upload-progress').classList.add('active');
+
+  const fd = new FormData();
+  fd.append('file',           selectedFile);
+  fd.append('upload_preset',  CLOUDINARY_UPLOAD_PRESET);
+  fd.append('folder',         MATERIA_FOLDER);
+  // Guardamos descripción y fecha como contexto en Cloudinary
+  // (se usa al sincronizar para no depender de localStorage)
+  fd.append('context', `desc=${encodeURIComponent(desc)}|fecha=${new Date().toISOString()}`);
+
+  // FIX: endpoint correcto según tipo
+  const endpoint = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resType}/upload`;
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', endpoint);
+
+  xhr.upload.onprogress = e => {
+    if (!e.lengthComputable) return;
+    const pct = Math.round(e.loaded / e.total * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent  = pct + '%';
+  };
+
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      // FIX: renderizamos inmediatamente sin recargar, usando los datos de respuesta
+      const data = JSON.parse(xhr.responseText);
+      const nuevoArchivo = {
+        public_id: data.public_id,
+        nombre:    selectedFile.name,
+        ext:       ext,
+        tipo:      ext.toUpperCase(),
+        desc:      desc || null,
+        size:      formatSize(selectedFile.size),
+        fecha:     new Date().toISOString(),
+        url:       data.secure_url,
+        resource_type: resType,
+      };
+      // Agregamos al tope sin esperar la re-sincronización
+      archivosCache.unshift(nuevoArchivo);
+      renderFiles(archivosCache);
+      showToast('Folio añadido al archivo', 'success');
+    } else {
+      const err = JSON.parse(xhr.responseText);
+      console.error('Cloudinary error:', err);
+      showToast('Error al subir: ' + (err.error?.message || 'revisá las credenciales'), 'error');
+    }
+    resetUpload(btn);
+  };
+
+  xhr.onerror = () => { showToast('Error de red', 'error'); resetUpload(btn); };
+  xhr.send(fd);
+}
+
+function resetUpload(btn) {
+  btn.disabled = false;
+  btn.querySelector('span').textContent = 'Subir archivo';
+  document.getElementById('upload-progress').classList.remove('active');
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('progress-pct').textContent  = '0%';
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-desc').value  = '';
+  selectedFile = null;
+}
+
+// ── SINCRONIZACIÓN VÍA NETLIFY FUNCTION (cross-device, seguro) ──
+// La función serverless hace la llamada firmada a Cloudinary.
+// El API Secret nunca está expuesto en el HTML.
+let archivosCache = [];
+
+async function syncFromCloudinary() {
+  setSyncStatus('loading', 'Sincronizando con el archivo…');
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('spinning');
+
+  try {
+    // Llama a la Netlify Function (mismo dominio, sin CORS issues)
+    const res = await fetch(`/.netlify/functions/cloudinary-search?folder=${MATERIA_FOLDER}`);
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    archivosCache = (data.archivos || []).map(a => ({
+      ...a,
+      size: formatSize(a.size),
+    }));
+
+    renderFiles(archivosCache);
+    setSyncStatus('ok', `Actualizado · ${archivosCache.length} ${archivosCache.length === 1 ? 'archivo' : 'archivos'}`);
+  } catch (e) {
+    console.error('Sync error:', e);
+    if (archivosCache.length > 0) {
+      setSyncStatus('error', 'Sin conexión · mostrando caché local');
+      renderFiles(archivosCache);
+    } else {
+      setSyncStatus('error', 'No se pudo conectar con el archivo');
+      renderFiles([]);
+    }
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+function setSyncStatus(type, text) {
+  const dot  = document.getElementById('sync-dot');
+  const span = document.getElementById('sync-text');
+  dot.className = 'sync-dot ' + type;
+  span.textContent = text;
+}
+
+// ── DELETE ──
+// FIX: para eliminar necesitamos la Admin API (requiere firma del servidor).
+// Como es una página estática, simplemente ocultamos el archivo del caché local
+// y mostramos un aviso. El archivo seguirá en Cloudinary hasta que lo borres
+// manualmente desde el dashboard.
+function deleteFile(publicId) {
+  if (!confirm('¿Querés quitar este archivo de la lista?\n(Para eliminarlo de Cloudinary, hacelo desde el dashboard)')) return;
+  archivosCache = archivosCache.filter(a => a.public_id !== publicId);
+  renderFiles(archivosCache);
+  showToast('Folio quitado de la vista');
+}
+
+// ── RENDER ──
+function renderFiles(lista) {
+  const list  = document.getElementById('files-list');
+  const count = document.getElementById('file-count');
+  count.textContent = lista.length + (lista.length === 1 ? ' archivo' : ' archivos');
+
+  if (lista.length === 0) {
+    list.innerHTML = '';
+    const empty = document.getElementById('empty-state') || createEmptyState();
+    list.appendChild(empty);
+    return;
+  }
+
+  list.innerHTML = lista.map((a, i) => {
+    // FIX: URL de descarga con fl_attachment funciona para raw/pdf
+    // Para imágenes/videos usamos la URL directa
+    const downloadUrl = a.resource_type === 'raw'
+      ? a.url.replace('/upload/', '/upload/fl_attachment/')
+      : a.url;
+
+    // Para imágenes generamos miniatura
+    const thumbHtml = a.resource_type === 'image'
+      ? `<img src="${a.url.replace('/upload/', '/upload/w_40,h_40,c_fill/')}"
+             style="width:40px;height:40px;object-fit:cover;border-radius:2px;opacity:0.7"
+             alt="" loading="lazy">`
+      : '';
+
+    return `
+    <div class="file-card" style="animation-delay:${i * 0.06}s">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:3px">
+        <span class="file-type-badge ${getBadgeClass(a.ext)}">${a.tipo}</span>
+        ${thumbHtml}
+      </div>
+      <div class="file-card-meta">
+        <div class="file-card-name" title="${a.nombre}">${a.nombre}</div>
+        ${a.desc ? `<div class="file-card-desc">${a.desc}</div>` : ''}
+        <div class="file-card-footer">
+          <span class="file-card-date">${formatDate(a.fecha)} · ${a.size}</span>
+        </div>
+      </div>
+      <div class="file-card-actions">
+        <a href="${downloadUrl}" target="_blank" rel="noopener" class="btn-icon" title="Abrir / Descargar">
+          <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+        <button class="btn-icon danger" onclick="deleteFile('${a.public_id}')" title="Quitar">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function createEmptyState() {
+  const div = document.createElement('div');
+  div.id = 'empty-state';
+  div.className = 'empty-state';
+  div.innerHTML = `<span class="empty-glyph">❧</span><p class="empty-text">El archivo aguarda sus primeros folios</p>`;
+  return div;
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ── INICIO ──
+syncFromCloudinary();
+</script>
+</body>
+</html>
