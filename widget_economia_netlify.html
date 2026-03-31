@@ -1067,11 +1067,28 @@ function setSyncStatus(type, text) {
 // Como es una página estática, simplemente ocultamos el archivo del caché local
 // y mostramos un aviso. El archivo seguirá en Cloudinary hasta que lo borres
 // manualmente desde el dashboard.
-function deleteFile(publicId) {
-  if (!confirm('¿Querés quitar este archivo de la lista?\n(Para eliminarlo de Cloudinary, hacelo desde el dashboard)')) return;
-  archivosCache = archivosCache.filter(a => a.public_id !== publicId);
-  renderFiles(archivosCache);
-  showToast('Folio quitado de la vista');
+async function deleteFile(publicId, resourceType = 'raw') {
+  if (!confirm('¿Eliminar este archivo definitivamente?')) return;
+
+  try {
+    const res = await fetch('/.netlify/functions/cloudinary-delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ public_id: publicId, resource_type: resourceType }),
+    });
+
+    const data = await res.json();
+
+    if (data.result === 'ok') {
+      archivosCache = archivosCache.filter(a => a.public_id !== publicId);
+      renderFiles(archivosCache);
+      showToast('Folio eliminado del archivo', 'success');
+    } else {
+      showToast('No se pudo eliminar: ' + (data.error || data.result), 'error');
+    }
+  } catch (e) {
+    showToast('Error de red', 'error');
+  }
 }
 
 // ── RENDER ──
