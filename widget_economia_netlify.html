@@ -640,6 +640,50 @@ body::after {
   color: var(--ink3);
 }
 
+/* ── MODAL CONFIRMACIÓN (reemplaza confirm() que Notion bloquea) ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border-h);
+  border-radius: 4px;
+  padding: 28px 24px;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  transform: translateY(12px);
+  transition: transform 0.2s ease;
+}
+.modal-overlay.active .modal { transform: translateY(0); }
+.modal-title {
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: var(--ink);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.modal-text {
+  font-family: var(--fell);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink2);
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
 /* ── TOAST ── */
 .toast {
   position: fixed;
@@ -784,6 +828,18 @@ body::after {
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Modal de confirmación (reemplaza confirm() bloqueado por Notion) -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Eliminar archivo</div>
+    <p class="modal-text" id="modal-text">¿Eliminar este archivo definitivamente?</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="modal-confirm"><span>Eliminar</span></button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════
@@ -1062,32 +1118,68 @@ function setSyncStatus(type, text) {
   span.textContent = text;
 }
 
+// ── MODAL (reemplaza confirm() bloqueado por Notion) ──
+let modalCallback = null;
+
+function openModal(text, onConfirm) {
+  document.getElementById('modal-text').textContent = text;
+  document.getElementById('modal-overlay').classList.add('active');
+  modalCallback = onConfirm;
+  document.getElementById('modal-confirm').onclick = () => {
+    closeModal();
+    if (modalCallback) modalCallback();
+  };
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+  modalCallback = null;
+}
+
+// Cerrar modal al click fuera
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
 // ── DELETE ──
-// FIX: para eliminar necesitamos la Admin API (requiere firma del servidor).
-// Como es una página estática, simplemente ocultamos el archivo del caché local
-// y mostramos un aviso. El archivo seguirá en Cloudinary hasta que lo borres
-// manualmente desde el dashboard.
 async function deleteFile(publicId, resourceType = 'raw') {
-  if (!confirm('¿Eliminar este archivo definitivamente?')) return;
-
-  try {
-    const res = await fetch('/.netlify/functions/cloudinary-delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ public_id: publicId, resource_type: resourceType }),
-    });
-
-    const data = await res.json();
-
-    if (data.result === 'ok') {
-      archivosCache = archivosCache.filter(a => a.public_id !== publicId);
-      renderFiles(archivosCache);
-      showToast('Folio eliminado del archivo', 'success');
-    } else {
-      showToast('No se pudo eliminar: ' + (data.error || data.result), 'error');
+  openModal('¿Eliminar este archivo definitivamente?', async () => {
+    try {
+      const res = await fetch('/.netlify/functions/cloudinary-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ public_id: publicId, resource_type: resourceType }),
+      });
+      const data = await res.json();
+      if (data.result === 'ok') {
+        archivosCache = archivosCache.filter(a => a.public_id !== publicId);
+        renderFiles(archivosCache);
+        showToast('Folio eliminado del archivo', 'success');
+      } else {
+        showToast('No se pudo eliminar', 'error');
+      }
+    } catch (e) {
+      showToast('Error de red', 'error');
     }
+  });
+}
+
+// ── DESCARGA compatible con Notion (fetch + blob) ──
+async function downloadFile(url, nombre) {
+  try {
+    showToast('Descargando…');
+    const res  = await fetch(url);
+    const blob = await res.blob();
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
   } catch (e) {
-    showToast('Error de red', 'error');
+    // Fallback: abrir en nueva pestaña si el fetch falla (CORS)
+    window.open(url, '_blank');
   }
 }
 
@@ -1105,13 +1197,10 @@ function renderFiles(lista) {
   }
 
   list.innerHTML = lista.map((a, i) => {
-    // FIX: URL de descarga con fl_attachment funciona para raw/pdf
-    // Para imágenes/videos usamos la URL directa
     const downloadUrl = a.resource_type === 'raw'
       ? a.url.replace('/upload/', '/upload/fl_attachment/')
       : a.url;
 
-    // Para imágenes generamos miniatura
     const thumbHtml = a.resource_type === 'image'
       ? `<img src="${a.url.replace('/upload/', '/upload/w_40,h_40,c_fill/')}"
              style="width:40px;height:40px;object-fit:cover;border-radius:2px;opacity:0.7"
@@ -1132,10 +1221,10 @@ function renderFiles(lista) {
         </div>
       </div>
       <div class="file-card-actions">
-        <a href="${downloadUrl}" target="_blank" rel="noopener" class="btn-icon" title="Abrir / Descargar">
+        <button class="btn-icon" onclick="downloadFile('${downloadUrl}', '${a.nombre}')" title="Descargar">
           <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </a>
-        <button class="btn-icon danger" onclick="deleteFile('${a.public_id}')" title="Quitar">
+        </button>
+        <button class="btn-icon danger" onclick="deleteFile('${a.public_id}', '${a.resource_type}')" title="Eliminar">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
       </div>
